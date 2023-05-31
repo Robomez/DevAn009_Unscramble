@@ -48,7 +48,6 @@ class GameFragment : Fragment() {
     ): View {
         // Inflate the layout XML file and return a binding object instance
         binding = DataBindingUtil.inflate(inflater, R.layout.game_fragment, container, false)
-        Log.d("GameFragment", "GameFragment created/re-created!")
         Log.d(
             "GameFragment", "Word: ${viewModel.currentScrambledWord} " +
                     "Score: ${viewModel.score.value} WordCount ${viewModel.currentWordCount.value}"
@@ -61,24 +60,16 @@ class GameFragment : Fragment() {
 
         binding.gameViewModel = viewModel
         binding.maxNoOfWords = MAX_NO_OF_WORDS
-        binding.lifecycleOwner = viewLifecycleOwner
+
+        // Specify the fragment view as the lifecycle owner of the binding.
+        // This is used so that the binding can observe LiveData updates
+
 
         // Setup a click listener for the Submit and Skip buttons.
         binding.submit.setOnClickListener { onSubmitWord() }
         binding.skip.setOnClickListener { onSkipWord() }
 
-        // Update the UI
-        viewModel.currentScrambledWord.observe(viewLifecycleOwner) { newWord ->
-            binding.textViewUnscrambledWord.text = newWord
-        }
-        viewModel.score.observe(viewLifecycleOwner) { newScore ->
-            binding.score.text = getString(R.string.score, newScore)
-        }
-        viewModel.currentWordCount.observe(
-            viewLifecycleOwner
-        ) { newWordCount ->
-            binding.wordCount.text = getString(R.string.word_count, newWordCount, MAX_NO_OF_WORDS)
-        }
+        binding.lifecycleOwner = viewLifecycleOwner
     }
 
     /*
@@ -109,15 +100,6 @@ class GameFragment : Fragment() {
         } else {
             showFinalScoreDialog()
         }
-    }
-
-    /*
-     * Gets a random word for the list of words and shuffles the letters in it.
-     */
-    private fun getNextScrambledWord(): String {
-        val tempWord = allWordsList.random().toCharArray()
-        tempWord.shuffle()
-        return String(tempWord)
     }
 
     /*
@@ -160,10 +142,5 @@ class GameFragment : Fragment() {
             binding.textField.isErrorEnabled = false
             binding.textInputEditText.text = null
         }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("GameFragment", "gameFragment destroyed!")
     }
 }
